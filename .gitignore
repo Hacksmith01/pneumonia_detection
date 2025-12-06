@@ -1,0 +1,107 @@
+# ===============================
+# Environment variables
+# ===============================
+.env
+.env.*
+*.env
+
+# ===============================
+# Python cache / build
+# ===============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+
+data/
+
+
+
+# ===============================
+# Virtual environments (IMPORTANT)
+# ===============================
+env/
+venv/
+ENV/
+.venv/
+.tfenv/
+virtualenv/
+
+# ===============================
+# Flask
+# ===============================
+instance/
+.webassets-cache/
+flask_session/
+
+# ===============================
+# Uploads / runtime generated files
+# ===============================
+uploads/
+data/uploads/
+tmp/
+temp/
+
+# keep empty uploads folder if needed
+!uploads/.gitkeep
+
+# ===============================
+# IDE / Editor
+# ===============================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# ===============================
+# OS files
+# ===============================
+.DS_Store
+Thumbs.db
+
+# ===============================
+# ML / Model files (large)
+# ===============================
+*.h5
+*.hdf5
+*.ckpt
+*.pkl
+*.joblib
+*.model
+*.pt
+*.onnx
+
+# ===============================
+# Logs
+# ===============================
+*.log
+
+# ===============================
+# Node (if frontend later)
+# ===============================
+node_modules/
+
+# ===============================
+# Build / distribution
+# ===============================
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# ===============================
+# Jupyter
+# ===============================
+.ipynb_checkpoints/
+
+# ===============================
+# Large native binaries (safety)
+# ===============================
+*.dll
+*.lib
+*.pyd
+*.so.*

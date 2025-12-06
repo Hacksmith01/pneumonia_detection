@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Analysis Result</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script defer src="{{ url_for('static', filename='scripts.js') }}"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="hero small">
+      <h1>Analysis Result</h1>
+      <a href="{{ url_for('index') }}" class="btn ghost">Analyze another</a>
+    </header>
+
+    <main class="container result-grid">
+      <!-- Mismatch Warning Banner -->
+      {% if mismatch_warning %}
+      <section class="card wide warning-banner">
+        <div class="warning-header">
+          <h3>{{ mismatch_warning.message }}</h3>
+        </div>
+        <div class="warning-content">
+          <p>{{ mismatch_warning.details }}</p>
+          {% if mismatch_warning.cnn_preferred %}
+          <div class="recommendation-box">
+            <p><strong>💡 Recommendation:</strong> The CNN prediction is preferred in this case. However, we strongly advise taking precautions and consulting with a licensed medical professional for a definitive diagnosis and appropriate treatment plan.</p>
+          </div>
+          {% endif %}
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- Images Section -->
+      <section class="card image-card">
+        <h3>📤 Your Uploaded Image</h3>
+        <div class="image-container">
+          <img src="{{ upload_url }}" class="result-img" alt="uploaded chest X-ray">
+        </div>
+      </section>
+
+      <section class="card image-card">
+        <h3>🎯 Best Match from Dataset</h3>
+        {% if best_match_path %}
+          <div class="image-container">
+            <img src="{{ best_match_path }}" class="result-img" alt="best match">
+          </div>
+          <div class="match-details">
+            <div class="detail-item">
+              <span class="detail-label">Category:</span>
+              <span class="detail-value {{ 'pneumonia' if best_match_info.category == 'PNEUMONIA' else 'normal' }}">{{ best_match_info.category }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">SSIM Score:</span>
+              <span class="detail-value">{{ '%.4f'|format(best_match_info.ssim) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">MSE Score:</span>
+              <span class="detail-value">{{ '%.6f'|format(best_match_info.mse) }}</span>
+            </div>
+          </div>
+        {% else %}
+          <p class="no-match">No best match found in the sampled dataset.</p>
+        {% endif %}
+      </section>
+
+      <!-- SSIM/MSE Results -->
+      <section class="card results-card">
+        <h3>📊 SSIM/MSE Analysis Results</h3>
+        <div class="results-content">
+          <div class="similarity-scores">
+            <div class="score-box normal-score">
+              <div class="score-header">Normal Lungs Similarity</div>
+              <div class="score-value">{{ summary.NORMAL.similarity_percent }}%</div>
+              <div class="score-details">
+                <small>SSIM: {{ '%.4f'|format(summary.NORMAL.avg_ssim) }}</small>
+                <small>Samples compared: {{ summary.NORMAL.samples_compared }}</small>
+              </div>
+            </div>
+            <div class="score-box pneumonia-score">
+              <div class="score-header">Pneumonia Similarity</div>
+              <div class="score-value">{{ summary.PNEUMONIA.similarity_percent }}%</div>
+              <div class="score-details">
+                <small>SSIM: {{ '%.4f'|format(summary.PNEUMONIA.avg_ssim) }}</small>
+                <small>Samples compared: {{ summary.PNEUMONIA.samples_compared }}</small>
+              </div>
+            </div>
+          </div>
+          <div class="prediction-box">
+            <div class="prediction-label">SSIM/MSE Prediction</div>
+            <div id="final-label" class="final-label {{ 'pneumonia' if 'Pneumonia' in prediction else 'normal' if 'Normal' in prediction else 'uncertain' }}">{{ prediction }}</div>
+            <div class="confidence-info">
+              <small>Confidence difference: {{ confidence_diff }}</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CNN Results -->
+      {% if cnn_info %}
+      <section class="card cnn-card">
+        <h3>🧠 CNN Deep Learning Analysis</h3>
+        <div class="cnn-content">
+          {% if cnn_info.error %}
+            <div class="error-box">
+              <p class="error-message">⚠️ CNN Analysis Error: {{ cnn_info.error }}</p>
+              <p class="error-note">The SSIM/MSE results are still available above.</p>
+            </div>
+          {% else %}
+            <div class="cnn-prediction">
+              <div class="cnn-label-box">
+                <span class="cnn-label-text">CNN Prediction:</span>
+                <span class="cnn-prediction-value {{ 'pneumonia' if 'Pneumonia' in cnn_info.label else 'normal' }}">{{ cnn_info.label }}</span>
+              </div>
+              <div class="cnn-confidence-box">
+                <div class="confidence-bar-container">
+                  <div class="confidence-bar" style="width: {{ cnn_info.confidence }}%"></div>
+                </div>
+                <div class="confidence-text">
+                  <strong>{{ cnn_info.confidence }}%</strong> confidence
+                </div>
+              </div>
+            </div>
+            <div class="cnn-explanation">
+              <p><small>💡 The CNN model analyzes deep features learned from thousands of chest X-ray images. This method is generally more reliable than similarity-based comparisons.</small></p>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- Gemini AI Analysis -->
+      {% if gemini_available %}
+      <section class="card wide gemini-card">
+        <h3>🤖 AI Assistant Analysis (Gemini)</h3>
+        <div class="gemini-content">
+          {% if gemini_analysis %}
+            <div class="gemini-initial-analysis">
+              <div class="gemini-text">{{ gemini_analysis|replace('\n', '<br>')|safe }}</div>
+            </div>
+          {% else %}
+            <div class="gemini-error">
+              <p>⚠️ Gemini analysis is not available. Please set your GEMINI_API_KEY environment variable or check your API key configuration.</p>
+            </div>
+          {% endif %}
+          
+          <!-- Chat Interface -->
+          <div class="chat-container">
+            <div class="chat-header">
+              <h4>💬 Ask Questions About Your X-Ray</h4>
+              <p class="chat-subtitle">Continue the conversation with our AI assistant</p>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+              {% if gemini_analysis %}
+              <div class="message assistant-message">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                  <div class="message-text">{{ gemini_analysis }}</div>
+                  <div class="message-time">Initial Analysis</div>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+            <div class="chat-input-container">
+              <form id="chat-form" class="chat-form">
+                <input 
+                  type="text" 
+                  id="chat-input" 
+                  class="chat-input" 
+                  placeholder="Ask a question about your X-ray analysis..."
+                  autocomplete="off"
+                >
+                <button type="submit" id="chat-send-btn" class="chat-send-btn">
+                  <span>Send</span>
+                  <span class="send-icon">➤</span>
+                </button>
+              </form>
+              <div id="chat-error" class="chat-error" style="display: none;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- Final Recommendation -->
+      <section class="card wide recommendation-card">
+        <h3>📋 Summary & Recommendations</h3>
+        <div class="recommendation-content">
+          <div class="recommendation-text">
+            {% if mismatch_warning %}
+              <p class="important-note">⚠️ <strong>Important:</strong> The analysis methods produced different results. While the CNN prediction is generally preferred, we recommend:</p>
+            {% else %}
+              <p class="important-note">✅ <strong>Analysis Complete:</strong> Both methods produced consistent results. However, please note:</p>
+            {% endif %}
+            <ul class="recommendation-list">
+              <li>This tool is for <strong>educational and research purposes only</strong></li>
+              <li>Results are <strong>not a medical diagnosis</strong></li>
+              <li><strong>Always consult</strong> with a licensed healthcare provider for medical decisions</li>
+              <li>If you have health concerns, <strong>seek immediate medical attention</strong></li>
+              {% if 'Pneumonia' in prediction or (cnn_info and 'Pneumonia' in cnn_info.get('label', '')) %}
+              <li class="urgent">🚨 If symptoms are present, contact a healthcare professional immediately</li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <small>Not a medical device. Always consult a licensed clinician for diagnosis.</small>
+    </footer>
+  </div>
+</body>
+</html>
