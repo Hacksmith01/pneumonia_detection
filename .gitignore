@@ -16,9 +16,10 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 
+# ===============================
+# Dataset (IMPORTANT)
+# ===============================
 data/
-
-
 
 # ===============================
 # Virtual environments (IMPORTANT)
@@ -45,7 +46,7 @@ data/uploads/
 tmp/
 temp/
 
-# keep empty uploads folder if needed
+# Keep empty uploads folder if needed
 !uploads/.gitkeep
 
 # ===============================
@@ -64,7 +65,7 @@ temp/
 Thumbs.db
 
 # ===============================
-# ML / Model files (large)
+# ML / Model files
 # ===============================
 *.h5
 *.hdf5
@@ -74,6 +75,9 @@ Thumbs.db
 *.model
 *.pt
 *.onnx
+
+# ✅ Allow ONLY the deployed model
+!pneumonia_cnn_model.h5
 
 # ===============================
 # Logs
